@@ -7,7 +7,6 @@ from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
 
 from cinema.models import Genre, Actor, CinemaHall, Movie, MovieSession, Order
 from cinema.permissions import IsAdminOrIfAuthenticatedReadOnly
@@ -31,7 +30,7 @@ from cinema.serializers import (
 class GenreViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
-    GenericViewSet,
+    viewsets.GenericViewSet,
 ):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
@@ -41,7 +40,7 @@ class GenreViewSet(
 class ActorViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
-    GenericViewSet,
+    viewsets.GenericViewSet,
 ):
     queryset = Actor.objects.all()
     serializer_class = ActorSerializer
@@ -51,7 +50,7 @@ class ActorViewSet(
 class CinemaHallViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
-    GenericViewSet,
+    viewsets.GenericViewSet,
 ):
     queryset = CinemaHall.objects.all()
     serializer_class = CinemaHallSerializer
@@ -109,9 +108,19 @@ class MovieViewSet(
     @extend_schema(
         parameters=[
             OpenApiParameter(
-                "titles",
-                type={"type": "array", "items": {"type": "number"}},
+                "title",
+                type={"type": "array", "items": {"type": "string"}},
                 description="Filter by title",
+            ),
+            OpenApiParameter(
+                "actors",
+                type={"type": "array", "items": {"type": "number"}},
+                description="Filter by actors",
+            ),
+            OpenApiParameter(
+                "genres",
+                type={"type": "array", "items": {"type": "number"}},
+                description="Filter by genres",
             )
         ]
     )
@@ -175,6 +184,24 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
 
         return MovieSessionSerializer
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "date",
+                type={"type": "array", "items": {"type": "string"}},
+                description="Filter by date",
+            ),
+            OpenApiParameter(
+                "movie",
+                type={"type": "array", "items": {"type": "number"}},
+                description="Filter by movie",
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        """Get list of movie_sessions"""
+        return super().list(request, *args, **kwargs)
+
 
 class OrderPagination(PageNumberPagination):
     page_size = 10
@@ -184,7 +211,7 @@ class OrderPagination(PageNumberPagination):
 class OrderViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
-    GenericViewSet,
+    viewsets.GenericViewSet,
 ):
     queryset = Order.objects.prefetch_related(
         "tickets__movie_session__movie", "tickets__movie_session__cinema_hall"

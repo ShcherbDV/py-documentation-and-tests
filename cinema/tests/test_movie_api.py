@@ -197,7 +197,7 @@ class AuthenticatedMovieAPITests(TestCase):
         serializer_with_genre = MovieListSerializer(movie_with_genre)
 
         self.assertIn(serializer_with_genre.data, res.data)
-        self.assertNotIn(serializer, res.data)
+        self.assertNotIn(serializer.data, res.data)
 
     def test_filter_movies_by_actor(self):
         movie_without_actor = sample_movie()
@@ -212,7 +212,7 @@ class AuthenticatedMovieAPITests(TestCase):
         serializer_with_actor = MovieListSerializer(movie_with_actor)
 
         self.assertIn(serializer_with_actor.data, res.data)
-        self.assertNotIn(serializer, res.data)
+        self.assertNotIn(serializer.data, res.data)
 
     def test_filter_movies_by_title(self):
         movie_with_title_1 = sample_movie(title="Star Wars")
@@ -220,14 +220,14 @@ class AuthenticatedMovieAPITests(TestCase):
 
         res = self.client.get(
             MOVIE_URL,
-            {"titles": f"{movie_with_title_1.title}, {movie_with_title_2.title}"},
+            {"title": {movie_with_title_1.title}},
         )
 
         serializer_with_title_1 = MovieListSerializer(movie_with_title_1)
         serializer_with_title_2 = MovieListSerializer(movie_with_title_2)
 
         self.assertIn(serializer_with_title_1.data, res.data)
-        self.assertNotIn(serializer_with_title_2, res.data)
+        self.assertNotIn(serializer_with_title_2.data, res.data)
 
     def test_retrieve_movie_detail(self):
         movie = sample_movie()
@@ -272,8 +272,8 @@ class AdminMovieAPITests(TestCase):
             "title": "Title1",
             "description": "Description1",
             "duration": 123,
-            "genres": genre.id,
-            "actors": actor.id,
+            "genres": [genre.id],
+            "actors": [actor.id]
         }
 
         res = self.client.post(MOVIE_URL, payload)
