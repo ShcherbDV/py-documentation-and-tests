@@ -191,7 +191,7 @@ class AuthenticatedMovieAPITests(TestCase):
         genre = Genre.objects.create(name="Genre1")
         movie_with_genre.genres.add(genre)
 
-        res = self.client.get(MOVIE_URL, {"genres": [genre.id]})
+        res = self.client.get(MOVIE_URL, {"genres": f"{genre.id}"})
 
         serializer = MovieListSerializer(movie_without_genre)
         serializer_with_genre = MovieListSerializer(movie_with_genre)
@@ -206,7 +206,7 @@ class AuthenticatedMovieAPITests(TestCase):
         actor = Actor.objects.create(first_name="Actor1", last_name="Actor2")
         movie_with_actor.actors.add(actor)
 
-        res = self.client.get(MOVIE_URL, {"actors": [actor.id]})
+        res = self.client.get(MOVIE_URL, {"actors": f"{actor.id}"})
 
         serializer = MovieListSerializer(movie_without_actor)
         serializer_with_actor = MovieListSerializer(movie_with_actor)
@@ -220,7 +220,7 @@ class AuthenticatedMovieAPITests(TestCase):
 
         res = self.client.get(
             MOVIE_URL,
-            {"title": {movie_with_title_1.title}},
+            {"title": movie_with_title_1.title},
         )
 
         serializer_with_title_1 = MovieListSerializer(movie_with_title_1)
@@ -248,8 +248,8 @@ class AuthenticatedMovieAPITests(TestCase):
             "title": "Title1",
             "description": "Description1",
             "duration": 123,
-            "genres": [sample_genre()],
-            "actors": [sample_actor()],
+            "genres": [sample_genre().id],
+            "actors": [sample_actor().id],
         }
 
         res = self.client.post(MOVIE_URL, payload)
@@ -285,3 +285,30 @@ class AdminMovieAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertIn(genre, genres)
         self.assertIn(actor, actors)
+
+    def test_delete_movie_not_allowed(self):
+        movie = sample_movie()
+
+        url = detail_url(movie.id)
+
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_update_movie_not_allowed(self):
+        movie = sample_movie()
+
+        url = detail_url(movie.id)
+
+        res = self.client.put(url)
+
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_partial_update_movie_not_allowed(self):
+        movie = sample_movie()
+
+        url = detail_url(movie.id)
+
+        res = self.client.patch(url)
+
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
