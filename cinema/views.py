@@ -108,8 +108,8 @@ class MovieViewSet(
     @extend_schema(
         parameters=[
             OpenApiParameter(
-                "titles",
-                type={"type": "array", "items": {"type": "string"}},
+                "title",
+                type={"type": "string"},
                 description="Filter by title",
             ),
             OpenApiParameter(
@@ -188,12 +188,12 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
         parameters=[
             OpenApiParameter(
                 "date",
-                type={"type": "string"},
+                type={"type": "string", "format": "date"},
                 description="Filter by date(date=2022-01-31)",
             ),
             OpenApiParameter(
                 "movie",
-                type={"type": "string"},
+                type={"type": "number"},
                 description="Filter by movie",
             )
         ]
